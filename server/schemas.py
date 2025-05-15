@@ -45,3 +45,23 @@ class OrderResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class OrderWithItems(BaseModel):
+    id: int
+    user_id: int
+    status: str
+    items: List[OrderItemResponse]
+    
+    class Config:
+        orm_mode = True
+
+
+# class OrderItem(Base):
+#     __tablename__ = "order_items"
+
+#     id = Column(Integer, primary_key=True, index=True)
+#     order_id = Column(Integer, ForeignKey("orders.id"))
+#     pizza_name = Column(String)
+#     quantity = Column(Integer)
+#     price = Column(Float)

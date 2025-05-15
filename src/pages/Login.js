@@ -18,7 +18,7 @@ const Login = () => {
 
   return (
     <div className="auth-page">
-      <h2>Login</h2>
+      <h2>Вход</h2>
       {error && <p className="error">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div>
@@ -39,10 +39,10 @@ const Login = () => {
             required
           />
         </div>
-        <button type="submit" className="cart-button">Login</button>
+        <button type="submit" className="cart-button">Войти</button>
       </form>
       <p>
-        Don't have an account? <a href="/register" className="cart-button">Register</a>
+        Нет аккаунта? <a href="/register" className="cart-button">Зарегистрироваться</a>
       </p>
     </div>
   );

@@ -12,13 +12,13 @@ const Header = ({ cartItems, onCartClick }) => {
       <div className="header-controls">
         {user ? (
           <>
-            {/* <span>Welcome, {user.username}</span> */}
-            <button onClick={logout} className="cart-button">Logout</button>
+            <button onClick={logout} className="cart-button">Выйти</button>
+            <Link to="/orders" className="cart-button">Мои заказы</Link>
           </>
         ) : (
           <>
-            <Link to="/login" className="cart-button">Login</Link>
-            <Link to="/register" className="cart-button">Register</Link>
+            <Link to="/login" className="cart-button">Войти</Link>
+            <Link to="/register" className="cart-button">Зарегистрироваться</Link>
           </>
         )}
         <button className="cart-button" onClick={onCartClick}>

@@ -4,9 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from database import SessionLocal, engine
 import models
@@ -171,3 +171,87 @@ async def create_order(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
+
+
+# @app.get("/orders/", response_model=List[schemas.OrderItemResponse])
+# async def read_user_orders(
+#     db: Session = Depends(get_db),
+#     current_user: models.User = Depends(get_current_user)
+# ):
+#     orders = db.query(models.Order).filter(models.Order.user_id == current_user.id).all()
+    
+
+#     order_item_ids = [order.id for order in orders]
+#     items = db.query(models.OrderItem).filter(models.OrderItem.order_id.in_(order_item_ids)).all()
+
+#     return items
+
+@app.get("/orders/", response_model=List[schemas.OrderWithItems])
+async def read_user_orders(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    orders = db.query(models.Order)\
+               .filter(models.Order.user_id == current_user.id)\
+               .order_by(models.Order.id.desc())\
+               .all()
+    
+    result = []
+    for order in orders:
+        items = db.query(models.OrderItem)\
+                 .filter(models.OrderItem.order_id == order.id)\
+                 .all()
+        
+        result.append({
+            "id": order.id,
+            "user_id": order.user_id,
+            "status": order.status,
+            "items": items
+        })
+    
+    return result
+
+@app.delete("/order-items/{item_id}")
+async def delete_order_item(
+    item_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """Удаление/уменьшение количества позиции в заказе с проверкой на пустой заказ"""
+    # Находим позицию заказа, принадлежащую текущему пользователю
+    db_item = db.query(models.OrderItem)\
+                .join(models.Order)\
+                .filter(models.OrderItem.id == item_id)\
+                .first()
+    
+    if not db_item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    order_id = db_item.order_id
+    
+    if db_item.quantity > 1:
+        # Уменьшаем количество
+        db_item.quantity -= 1
+        db.commit()
+        db.refresh(db_item)
+        message = "Quantity decreased"
+    else:
+        # Удаляем позицию полностью
+        db.delete(db_item)
+        db.commit()
+        message = "Item removed"
+        
+        # Проверяем, остались ли еще позиции в заказе
+        remaining_items = db.query(models.OrderItem)\
+                          .filter(models.OrderItem.order_id == order_id)\
+                          .count()
+        
+        if remaining_items == 0:
+            # Если позиций не осталось - удаляем весь заказ
+            db.query(models.Order)\
+              .filter(models.Order.id == order_id)\
+              .delete()
+            db.commit()
+            message = "Item removed and order deleted as it became empty"
+    
+    return {"message": message}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import CartItem from './CartItem';
 
 const Cart = ({ items, totalPrice, onUpdateQuantity, onRemoveItem, onClose }) => {
   const { user } = useAuth();
@@ -51,19 +52,44 @@ const Cart = ({ items, totalPrice, onUpdateQuantity, onRemoveItem, onClose }) =>
       setIsLoading(false);
     }
   };
-
   return (
     <div className="cart-overlay">
-      {/* ... остальной код ... */}
-      <button 
-        className="checkout-button" 
-        onClick={handleCheckout}
-        disabled={isLoading || items.length === 0}
-      >
-        {isLoading ? 'Оформляем...' : 'Оформить заказ'}
-      </button>
-      {orderSuccess && <p className="success-message">Заказ успешно оформлен!</p>}
-      {error && <p className="error-message">{error}</p>}
+      <div className="cart">
+        <div className="cart-header">
+          <h2>Ваш заказ</h2>
+          <button className="close-button" onClick={onClose}>×</button>
+        </div>
+        
+        {items.length === 0 ? (
+          <p className="empty-cart">Корзина пуста</p>
+        ) : (
+          <>
+            <div className="cart-items">
+              {items.map(item => (
+                <CartItem
+                  key={item.id}
+                  item={item}
+                  onUpdateQuantity={onUpdateQuantity}
+                  onRemoveItem={onRemoveItem}
+                />
+              ))}
+            </div>
+            <div className="cart-total">
+              <span>Итого:</span>
+              <span>{totalPrice} ₽</span>
+            </div>
+            <button 
+              className="checkout-button" 
+              onClick={handleCheckout}
+              disabled={isLoading || items.length === 0}
+            >
+              {isLoading ? 'Оформляем...' : 'Оформить заказ'}
+            </button>
+            {orderSuccess && <p className="success-message">Заказ успешно оформлен!</p>}
+            {error && <p className="error-message">{error}</p>}
+          </>
+        )}
+      </div>
     </div>
   );
 };
