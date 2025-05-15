@@ -28,6 +28,7 @@
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
+  margin: 1px;
 }
 
 .menu h2 {
@@ -163,4 +164,15 @@
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
+}
+
+.success-message {
+  color: #4caf50;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.checkout-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
 }
