@@ -38,7 +38,6 @@ const Cart = ({ items, totalPrice, onUpdateQuantity, onRemoveItem, onClose }) =>
 
       if (response.status === 200) {
         setOrderSuccess(true);
-        // Очистка корзины после успешного заказа
         setTimeout(() => {
           items.forEach(item => onRemoveItem(item.id));
           onClose();

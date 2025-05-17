@@ -24,15 +24,14 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 # Настройки CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  #
+    allow_origins=["*"],  # Лучше поправить
     allow_credentials=True,
-    allow_methods=["*"],  # Разрешенные методы (GET, POST и т.д.)
+    allow_methods=["*"],  # Разрешенные методы
     allow_headers=["*"],  # Разрешенные заголовки
 )
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-# Зависимость для получения DB сессии
 def get_db():
     db = SessionLocal()
     try:
@@ -76,7 +75,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         raise credentials_exception
     return user
 
-# Роуты для аутентификации
 @app.post("/token", response_model=schemas.Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.username == form_data.username).first()
@@ -111,12 +109,10 @@ async def register_user(user: schemas.UserCreate, db: Session = Depends(get_db))
     db.refresh(db_user)
     return db_user
 
-# Защищённые роуты
 @app.get("/users/me/", response_model=schemas.User)
 async def read_users_me(current_user: schemas.User = Depends(get_current_user)):
     return current_user
 
-# Роуты для пиццерии (из предыдущей версии)
 @app.get("/menu")
 async def get_menu():
     return [
@@ -126,12 +122,8 @@ async def get_menu():
         {"id": 4, "name": "Четыре сыра", "price": 500, "description": "Сливочный соус, моцарелла, пармезан, дор блю, чеддер"},
     ]
 
-@app.post("/order")
-async def create_order(order: dict, current_user: schemas.User = Depends(get_current_user)):
-    # Здесь должна быть логика сохранения заказа
-    return {"message": "Order created successfully", "order": order}
 
-@app.post("/orders/", response_model=schemas.OrderResponse)  # Изменили на OrderResponse
+@app.post("/orders/", response_model=schemas.OrderResponse)
 async def create_order(
     order: schemas.OrderCreate,
     db: Session = Depends(get_db),
@@ -141,9 +133,8 @@ async def create_order(
         # Создаем заказ
         db_order = models.Order(user_id=current_user.id)
         db.add(db_order)
-        db.flush()  # Используем flush для получения ID без полного коммита
+        db.flush()
         
-        # Создаем список items для ответа
         order_items = []
         
         # Добавляем товары в заказ
@@ -160,7 +151,6 @@ async def create_order(
         db.commit()
         db.refresh(db_order)
         
-        # Возвращаем заказ с items
         return {
             "id": db_order.id,
             "user_id": db_order.user_id,
@@ -218,7 +208,6 @@ async def delete_order_item(
     current_user: models.User = Depends(get_current_user)
 ):
     """Удаление/уменьшение количества позиции в заказе с проверкой на пустой заказ"""
-    # Находим позицию заказа, принадлежащую текущему пользователю
     db_item = db.query(models.OrderItem)\
                 .join(models.Order)\
                 .filter(models.OrderItem.id == item_id)\
@@ -230,13 +219,11 @@ async def delete_order_item(
     order_id = db_item.order_id
     
     if db_item.quantity > 1:
-        # Уменьшаем количество
         db_item.quantity -= 1
         db.commit()
         db.refresh(db_item)
         message = "Quantity decreased"
     else:
-        # Удаляем позицию полностью
         db.delete(db_item)
         db.commit()
         message = "Item removed"

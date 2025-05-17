@@ -38,7 +38,6 @@ const OrdersPage = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      // Оптимистичное обновление UI
       setOrders(prevOrders => {
         return prevOrders.map(order => {
           if (order.id === orderId) {

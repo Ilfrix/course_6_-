@@ -20,7 +20,7 @@ const Register = () => {
 
   return (
     <div className="auth-page">
-      <h2>Register</h2>
+      <h2>Регистрация</h2>
       {error && <p className="error">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div>
@@ -50,17 +50,17 @@ const Register = () => {
           />
         </div>
         <div>
-          <label>Full Name:</label>
+          <label>FullName:</label>
           <input
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
           />
         </div>
-        <button type="submit" className="cart-button">Register</button>
+        <button type="submit" className="cart-button">Регистрация</button>
       </form>
       <p>
-        Already have an account? <a href="/login" className="cart-button">Login</a>
+        Уже есть аккаунт? <a href="/login" className="cart-button">Войти</a>
       </p>
     </div>
   );

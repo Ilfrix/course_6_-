@@ -15,7 +15,7 @@ class Order(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
-    status = Column(String, default="pending")
+    status = Column(String, default="Готовится")
 
 class OrderItem(Base):
     __tablename__ = "order_items"
