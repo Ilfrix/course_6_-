@@ -11,15 +11,17 @@ from telegram.ext import (
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import models
+from dotenv import load_dotenv
+import os
+from database import SessionLocal, engine
+
+load_dotenv()
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
 logger = logging.getLogger(__name__)
-
-DATABASE_URL = "sqlite:///./pizzeria.db"
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def get_db():
     db = SessionLocal()
@@ -84,7 +86,7 @@ async def handle_order_id(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         await update.message.reply_text("Пожалуйста, отправьте корректный ID заказа (число).")
 
 def main() -> None:
-    application = Application.builder().token("5994362789:AAG46EnxLhtgbwV3v9uymwn365bj0L1VmYI").build()
+    application = Application.builder().token(TOKEN).build()
 
     # Регистрируем обработчики
     application.add_handler(CommandHandler("start", start))
