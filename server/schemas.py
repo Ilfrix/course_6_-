@@ -41,16 +41,6 @@ class OrderItemResponse(OrderItemCreate):
 class OrderCreate(BaseModel):
     items: List[OrderItemCreate]
 
-class OrderResponse(BaseModel):
-    id: int
-    user_id: int
-    status: str
-    order_hash: str
-    items: List[OrderItemResponse]
-
-    class Config:
-        orm_mode = True
-
 class OrderWithItems(BaseModel):
     id: int
     user_id: int

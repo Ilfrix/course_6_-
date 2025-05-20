@@ -20,15 +20,15 @@ app = FastAPI()
 # Настройки для JWT
 SECRET_KEY = "SuperPizzeria"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1
+ACCESS_TOKEN_EXPIRE_MINUTES = 45
 
 # Настройки CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Лучше поправить
     allow_credentials=True,
-    allow_methods=["*"],  # Разрешенные методы
-    allow_headers=["*"],  # Разрешенные заголовки
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -52,7 +52,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=1)
+        expire = datetime.utcnow() + timedelta(minutes=45)
 
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
@@ -183,7 +183,7 @@ async def get_menu():
     ]
 
 
-@app.post("/orders/", response_model=schemas.OrderResponse)
+@app.post("/orders/", response_model=schemas.OrderWithItems)
 async def create_order(
     order: schemas.OrderCreate,
     db: Session = Depends(get_db),
@@ -191,14 +191,12 @@ async def create_order(
 ):
     try:
         order_hash = str(uuid.uuid4())
-
         db_order = models.Order(
             user_id=current_user.id,
             order_hash=order_hash
         )
         db.add(db_order)
         db.flush()
-        
         order_items = []
         
         # Добавляем товары в заказ
@@ -260,7 +258,7 @@ async def delete_order_item(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    """Удаление/уменьшение количества позиции в заказе с проверкой на пустой заказ"""
+    # Удаление/уменьшение количества позиции в заказе с проверкой на пустой заказ
     db_item = db.query(models.OrderItem)\
                 .join(models.Order)\
                 .filter(models.OrderItem.id == item_id)\

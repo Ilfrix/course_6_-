@@ -4,4 +4,6 @@ python-jose[cryptography]
 passlib
 python-multipart
 sqlalchemy
-python-telegram-bot
+python-dotenv
+psycopg2
+bcrypt

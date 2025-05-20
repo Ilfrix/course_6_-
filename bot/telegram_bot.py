@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List
+from typing import Dict
 from telegram import Update
 from telegram.ext import (
     Application,
@@ -11,7 +11,6 @@ from telegram.ext import (
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import models
-import schemas
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO

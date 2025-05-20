@@ -14,11 +14,11 @@ export const AuthProvider = ({ children }) => {
   const refreshAccessToken = useCallback(async () => {
     try {
       const response = await axios.post('http://localhost:8000/refresh-token', {
-        refresh_token: localStorage.getItem('refresh_token') // Берем актуальный токен
+        refresh_token: localStorage.getItem('refresh_token')
       });
       
       const { access_token, refresh_token } = response.data;
-      // Обновляем и состояние, и localStorage
+      // Обновление и состояния и localStorage
       localStorage.setItem('access_token', access_token);
       localStorage.setItem('refresh_token', refresh_token);
       setAccessToken(access_token);
@@ -29,12 +29,12 @@ export const AuthProvider = ({ children }) => {
       logout();
       throw err;
     }
-  }, []); // Убрана зависимость от refreshToken
+  }, []);
 
   // Настройка интерцепторов axios
   useEffect(() => {
     const requestInterceptor = axios.interceptors.request.use(config => {
-      const token = localStorage.getItem('access_token'); // Всегда берем актуальный токен
+      const token = localStorage.getItem('access_token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
