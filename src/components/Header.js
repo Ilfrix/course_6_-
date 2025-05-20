@@ -24,6 +24,7 @@ const Header = ({ cartItems, onCartClick }) => {
         <button className="cart-button" onClick={onCartClick}>
           Корзина ({cartItemsCount})
         </button>
+        <p>г. Москва, ул. Проспект Вернадского 78</p>
       </div>
     </header>
   );

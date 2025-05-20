@@ -9,6 +9,8 @@ def clear_tables():
         # Удаление данных из таблиц
         cursor.execute("DELETE FROM order_items;")
         cursor.execute("DELETE FROM orders;")
+        cursor.execute("DROP TABLE orders;")
+        cursor.execute("DROP TABLE order_items;")
         
         # Подтверждение изменений
         conn.commit()

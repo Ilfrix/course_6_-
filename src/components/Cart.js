@@ -24,7 +24,7 @@ const Cart = ({ items, totalPrice, onUpdateQuantity, onRemoveItem, onClose }) =>
         }))
       };
 
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       if (!token) throw new Error('No authentication token found');
       
       const response = await axios.post('http://localhost:8000/orders/', orderData, {

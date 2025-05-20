@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
 from database import Base
 
 class User(Base):
@@ -16,6 +16,7 @@ class Order(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     status = Column(String, default="Готовится")
+    order_hash = Column(String, unique=True, index=True)
 
 class OrderItem(Base):
     __tablename__ = "order_items"
@@ -25,3 +26,11 @@ class OrderItem(Base):
     pizza_name = Column(String)
     quantity = Column(Integer)
     price = Column(Float)
+
+class RefreshToken(Base):
+    __tablename__ = "refresh_tokens"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    token = Column(String, unique=True, index=True)
+    expires_at = Column(DateTime)

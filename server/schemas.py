@@ -18,6 +18,10 @@ class User(UserBase):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    refresh_token: str
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
 
 class TokenData(BaseModel):
     username: Optional[str] = None
@@ -41,27 +45,18 @@ class OrderResponse(BaseModel):
     id: int
     user_id: int
     status: str
+    order_hash: str
     items: List[OrderItemResponse]
 
     class Config:
         orm_mode = True
-
 
 class OrderWithItems(BaseModel):
     id: int
     user_id: int
     status: str
+    order_hash: str
     items: List[OrderItemResponse]
     
     class Config:
         orm_mode = True
-
-
-# class OrderItem(Base):
-#     __tablename__ = "order_items"
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     order_id = Column(Integer, ForeignKey("orders.id"))
-#     pizza_name = Column(String)
-#     quantity = Column(Integer)
-#     price = Column(Float)

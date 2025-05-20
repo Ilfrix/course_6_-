@@ -13,7 +13,7 @@ const OrdersPage = () => {
 
   const fetchOrders = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       const response = await axios.get('http://localhost:8000/orders/', {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -32,7 +32,7 @@ const OrdersPage = () => {
   const handleRemoveItem = async (itemId, orderId) => {
     try {
       setRemovingItems(prev => ({ ...prev, [itemId]: true }));
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       
       await axios.delete(`http://localhost:8000/order-items/${itemId}`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -70,6 +70,7 @@ const OrdersPage = () => {
   return (
     <div className="orders-container">
       <h1>Ваши заказы</h1>
+      <p>Вы можете отслеживать свои заказы также в Телеграм по уникальному номеру. @mireapizzabot</p>
       <Link to="/" className="back-link">← Вернуться к меню</Link>
       
       {orders.length === 0 ? (
@@ -80,7 +81,13 @@ const OrdersPage = () => {
             <div key={order.id} className="order-card">
               <div className="order-header">
                 <h2>Заказ #{order.id}</h2>
+                
                 <p>Статус: <span className={`status-${order.status}`}>{order.status}</span></p>
+                
+                <div>
+                  <br />
+                  <p>Уникальный номер:{order.order_hash}</p>
+                </div>
               </div>
               
               <div className="order-items">

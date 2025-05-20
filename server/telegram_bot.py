@@ -29,11 +29,11 @@ def get_db():
     finally:
         db.close()
 
-async def get_order_info(order_id: int) -> Dict:
+async def get_order_info(order_hash: str) -> Dict:
     db = next(get_db())
     
     order = db.query(models.Order)\
-             .filter(models.Order.id == order_id)\
+             .filter(models.Order.order_hash == order_hash)\
              .first()
     
     if not order:
@@ -57,15 +57,15 @@ async def get_order_info(order_id: int) -> Dict:
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
-        'Привет! Отправь мне ID заказа, и я покажу информацию о нём.\n'
-        'Например, отправь: 12345'
+        'Привет! Отправь мне Уникальный номер заказа, и я покажу информацию о нём.\n'
+        'Например, отправь: 5fc32595-e919-4cad-804d-ced3038942b4'
     )
 
 async def handle_order_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     try:
         
-        order_id = int(update.message.text)
-        order_info = await get_order_info(order_id)
+        order_hash = str(update.message.text)
+        order_info = await get_order_info(order_hash)
         
         if order_info:
             items_text = "\n".join(

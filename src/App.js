@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import MenuPage from './pages/MenuPage';
@@ -8,8 +7,6 @@ import OrdersPage from './pages/OrdersPage';
 import './styles.css';
 
 const App = () => {
-  const [cartItems, setCartItems] = useState([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
 
   return (
     <AuthProvider>

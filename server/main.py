@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session, joinedload
 from database import SessionLocal, engine
 import models
 import schemas
+import uuid
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -19,7 +20,7 @@ app = FastAPI()
 # Настройки для JWT
 SECRET_KEY = "SuperPizzeria"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 1
 
 # Настройки CORS
 app.add_middleware(
@@ -51,10 +52,33 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.utcnow() + timedelta(minutes=1)
+
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+def create_refresh_token(user_id: int, expires_delta: Optional[timedelta] = None):
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(days=1)
+    
+    refresh_token = str(uuid.uuid4())
+    
+    db = SessionLocal()
+    try:
+        db_refresh_token = models.RefreshToken(
+            user_id=user_id,
+            token=refresh_token,
+            expires_at=expire
+        )
+        db.add(db_refresh_token)
+        db.commit()
+        db.refresh(db_refresh_token)
+    finally:
+        db.close()
+    
+    return refresh_token
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
@@ -64,13 +88,15 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
+        user_id: str = payload.get("sub")
+        if user_id is None:
             raise credentials_exception
-    except JWTError:
+    except JWTError as e:
+
         raise credentials_exception
-    
-    user = db.query(models.User).filter(models.User.username == username).first()
+
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+
     if user is None:
         raise credentials_exception
     return user
@@ -87,9 +113,43 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"sub": str(user.id)}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+
+    refresh_token_expires = timedelta(days=1)
+    refresh_token = create_refresh_token(user.id, refresh_token_expires)
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "refresh_token": refresh_token
+    }
+
+@app.post("/refresh-token", response_model=schemas.Token)
+async def refresh_access_token(request: schemas.RefreshTokenRequest, db: Session = Depends(get_db)):
+    db_refresh_token = db.query(models.RefreshToken)\
+                         .filter(models.RefreshToken.token == request.refresh_token)\
+                         .first()
+    if not db_refresh_token or db_refresh_token.expires_at < datetime.utcnow():
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    
+    # Генерируем новые токены
+    new_access_token = create_access_token(
+        data={"sub": str(db_refresh_token.user_id)},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    # Создаем новый refresh-токен
+    new_refresh_token = create_refresh_token(db_refresh_token.user_id, timedelta(days=1))
+    
+    # Удаляем старый токен
+    db.delete(db_refresh_token)
+    db.commit()
+    
+    return {
+        "access_token": new_access_token,
+        "token_type": "bearer",
+        "refresh_token": new_refresh_token
+    }
 
 @app.post("/register", response_model=schemas.User)
 async def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
@@ -130,8 +190,12 @@ async def create_order(
     current_user: models.User = Depends(get_current_user)
 ):
     try:
-        # Создаем заказ
-        db_order = models.Order(user_id=current_user.id)
+        order_hash = str(uuid.uuid4())
+
+        db_order = models.Order(
+            user_id=current_user.id,
+            order_hash=order_hash
+        )
         db.add(db_order)
         db.flush()
         
@@ -155,6 +219,7 @@ async def create_order(
             "id": db_order.id,
             "user_id": db_order.user_id,
             "status": db_order.status,
+            "order_hash": db_order.order_hash,
             "items": order_items
         }
         
@@ -162,19 +227,6 @@ async def create_order(
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
 
-
-# @app.get("/orders/", response_model=List[schemas.OrderItemResponse])
-# async def read_user_orders(
-#     db: Session = Depends(get_db),
-#     current_user: models.User = Depends(get_current_user)
-# ):
-#     orders = db.query(models.Order).filter(models.Order.user_id == current_user.id).all()
-    
-
-#     order_item_ids = [order.id for order in orders]
-#     items = db.query(models.OrderItem).filter(models.OrderItem.order_id.in_(order_item_ids)).all()
-
-#     return items
 
 @app.get("/orders/", response_model=List[schemas.OrderWithItems])
 async def read_user_orders(
@@ -196,6 +248,7 @@ async def read_user_orders(
             "id": order.id,
             "user_id": order.user_id,
             "status": order.status,
+            "order_hash": order.order_hash,
             "items": items
         })
     
