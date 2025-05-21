@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
   // Функция для обновления токена
   const refreshAccessToken = useCallback(async () => {
     try {
-      const response = await axios.post('http://localhost:8000/refresh-token', {
+      const response = await axios.post(`${process.env.REACT_APP_SERVER_IP}:8000/refresh-token`, {
         refresh_token: localStorage.getItem('refresh_token')
       });
       
@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }) => {
     const verifyAuth = async () => {
       if (accessToken) {
         try {
-          const response = await axios.get('http://localhost:8000/users/me/', {
+          const response = await axios.get(`${process.env.REACT_APP_SERVER_IP}:8000/users/me/`, {
             headers: {
               Authorization: `Bearer ${accessToken}`
             }
@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }) => {
           if (err.response?.status === 401 && refreshToken) {
             try {
               await refreshAccessToken();
-              const newResponse = await axios.get('http://localhost:8000/users/me/', {
+              const newResponse = await axios.get(`${process.env.REACT_APP_SERVER_IP}:8000/users/me/`, {
                 headers: {
                   Authorization: `Bearer ${accessToken}`
                 }
@@ -108,7 +108,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-      const response = await axios.post('http://localhost:8000/token', {
+      const response = await axios.post(`${process.env.REACT_APP_SERVER_IP}:8000/token`, {
         username,
         password,
       }, {
@@ -121,7 +121,7 @@ export const AuthProvider = ({ children }) => {
       setAccessToken(response.data.access_token);
       setRefreshToken(response.data.refresh_token);
       
-      const userResponse = await axios.get('http://localhost:8000/users/me/', {
+      const userResponse = await axios.get(`${process.env.REACT_APP_SERVER_IP}:8000/users/me/`, {
         headers: {
           Authorization: `Bearer ${response.data.access_token}`
         }
@@ -138,13 +138,12 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, password, email, fullName) => {
     try {
-      await axios.post('http://localhost:8000/register', {
+      await axios.post(`${process.env.REACT_APP_SERVER_IP}:8000/register/`, {
         username,
         password,
         email,
         full_name: fullName
       });
-      
       return await login(username, password);
     } catch (err) {
       setError(err.response?.data?.detail || 'Registration failed');

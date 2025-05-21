@@ -14,7 +14,7 @@ const OrdersPage = () => {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await axios.get('http://localhost:8000/orders/', {
+      const response = await axios.get(`${process.env.REACT_APP_SERVER_IP}:8000/orders/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setOrders(response.data);
@@ -34,7 +34,7 @@ const OrdersPage = () => {
       setRemovingItems(prev => ({ ...prev, [itemId]: true }));
       const token = localStorage.getItem('access_token');
       
-      await axios.delete(`http://localhost:8000/order-items/${itemId}`, {
+      await axios.delete(`${process.env.REACT_APP_SERVER_IP}:8000/order-items/${itemId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import CartItem from './CartItem';
 
 const Cart = ({ items, totalPrice, onUpdateQuantity, onRemoveItem, onClose }) => {
-  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [error, setError] = useState(null);
@@ -27,7 +26,7 @@ const Cart = ({ items, totalPrice, onUpdateQuantity, onRemoveItem, onClose }) =>
       const token = localStorage.getItem('access_token');
       if (!token) throw new Error('No authentication token found');
       
-      const response = await axios.post('http://localhost:8000/orders/', orderData, {
+      const response = await axios.post(`${process.env.REACT_APP_SERVER_IP}:8000/orders/`, orderData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'access-control-allow-credentials':	true,

@@ -7,14 +7,15 @@ from datetime import datetime, timedelta
 from typing import Optional, List
 from pydantic import BaseModel
 from sqlalchemy.orm import Session, joinedload
-
+import os
+from dotenv import load_dotenv
 from database import SessionLocal, engine
 import models
 import schemas
 import uuid
 
 models.Base.metadata.create_all(bind=engine)
-
+load_dotenv()
 app = FastAPI()
 
 # Настройки для JWT
@@ -23,13 +24,29 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 45
 
 # Настройки CORS
+allowed_origin = os.getenv("SERVER_IP")
+print(allowed_origin)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Лучше поправить
+    allow_origins=[f'{allowed_origin}:3000', 'http://localhost:3000'],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+'''
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://react_frontend:3000"
+        'http://localhost:3000',
+
+    ],  # Лучше поправить
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"]
+)
+'''
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
