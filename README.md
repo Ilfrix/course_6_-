@@ -76,7 +76,7 @@
 
 ## Технологический стек
 
-- Frontend: React, Context API
+- Frontend: React
 
 - Backend: Python FastAPI
 
