@@ -1,0 +1,4 @@
+# file: /home/polyanskii/app/server/tests.py
+# hypothesis_version: 6.135.7
+
+[100, 200, 300, 350, 400, 401, 404, 422, 500, 1000, '\x00', '/menu', '/orders/', '/refresh-token', '/register', '/token', '/users/me/', 'Authorization', 'Test User', 'access_token', 'email', 'full_name', 'function', 'grant_type', 'items', 'password', 'pizza_name', 'price', 'quantity', 'refresh_token', 'secret', 'username', 'utf-8', 'Гавайская', 'Маргарита', 'Пепперони', 'Четыре сыра']
