@@ -1,4 +1,0 @@
-# file: /home/polyanskii/app/server/main.py
-# hypothesis_version: 6.135.7
-
-[350, 400, 401, 404, 450, 500, '*', '/menu', '/orders/', '/refresh-token', '/register', '/token', '/users/me/', 'Bearer', 'HS256', 'Item not found', 'Item removed', 'Quantity decreased', 'SERVER_IP', 'SuperPizzeria', 'WWW-Authenticate', 'access_token', 'auto', 'bcrypt', 'bearer', 'description', 'exp', 'id', 'items', 'message', 'name', 'order_hash', 'price', 'refresh_token', 'status', 'sub', 'token', 'token_type', 'user_id', 'Гавайская', 'Маргарита', 'Пепперони', 'Четыре сыра']

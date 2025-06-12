@@ -1,4 +1,0 @@
-# file: /home/polyanskii/app/server/models.py
-# hypothesis_version: 6.135.7
-
-['order_items', 'orders', 'orders.id', 'refresh_tokens', 'users', 'users.id', 'Готовится']
